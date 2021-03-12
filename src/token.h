@@ -14,7 +14,7 @@ enum class TokenType {
     Comma,
     NewLine,
     Comment,
-    EOF
+    XASMEOF
 };
 
 struct Token {
