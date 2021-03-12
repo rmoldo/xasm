@@ -11,7 +11,9 @@ enum class TokenType {
     Lparan,
     Rparan,
     Colon,
+    Dot,
     Comma,
+    Register,
     NewLine,
     Comment,
     XASMEOF
