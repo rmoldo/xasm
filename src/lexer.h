@@ -10,7 +10,9 @@
 
 class Lexer {
 public:
+    Lexer() {}
     Lexer(std::string &source);
+
     Token nextToken();
 private:
     std::string source;
