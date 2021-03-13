@@ -6,7 +6,7 @@
 #define XASM_TOKEN_H
 
 enum class TokenType {
-    Symbol = 0x0,
+    Instruction = 0x0,
     Number,
     Lparan,
     Rparan,
@@ -14,6 +14,7 @@ enum class TokenType {
     Dot,
     Comma,
     Register,
+    Label,
     NewLine,
     Comment,
     XASMEOF

@@ -93,13 +93,17 @@ Token Lexer::nextToken() {
                                         nextChar();
                                 }
                         } else {
-                                t.type = TokenType::Symbol;
+                                t.type = TokenType::Instruction;
                                 nextChar();
 
                                 while(std::isalnum(currentChar)) {
                                         t.value += currentChar;
                                         nextChar();
                                 }
+
+                                // if current character is : then label
+                                if (currentChar == ':')
+                                        t.type = TokenType::Label;
                         }
 
                         break;
