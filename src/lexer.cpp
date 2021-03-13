@@ -4,7 +4,9 @@
 
 
 #include <string>
+#include <algorithm>
 #include "lexer.h"
+#include "defs.h"
 
 #define XASMEOFConstant 3
 
@@ -101,8 +103,19 @@ Token Lexer::nextToken() {
                                         nextChar();
                                 }
 
-                                // if current character is : then label
-                                if (currentChar == ':')
+                                std::string word = t.value;
+
+                                std::transform(word.begin(), word.end(),
+                                               word.begin(),
+                                               [](char c) {return std::tolower(c);});
+
+                                auto iterator = std::find_if(instructionVector.begin(),
+                                                             instructionVector.end(),
+                                                             [&word](const std::string &instructionName) {
+                                        return word == instructionName;
+                                });
+
+                                if (currentChar == ':' || iterator == instructionVector.end())
                                         t.type = TokenType::Label;
                         }
 
