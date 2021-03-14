@@ -70,7 +70,7 @@ Token Lexer::nextToken() {
 
                         break;
                 case '0' ... '9':
-                        t.type = TokenType::Number;
+                        t.type = TokenType::DecimalNumber;
                         nextChar();
 
                         while (std::isdigit(currentChar)) {
@@ -90,7 +90,16 @@ Token Lexer::nextToken() {
                                 t.type = TokenType::Register;
                                 nextChar();
 
-                                while(std::isalnum(currentChar)) {
+                                while (std::isalnum(currentChar)) {
+                                        t.value += currentChar;
+                                        nextChar();
+                                }
+                        } else if (currentChar == '%') {
+                                t.type = TokenType::HexNumber;
+                                t.value = "";
+                                nextChar();
+
+                                while (std::isxdigit(currentChar)) {
                                         t.value += currentChar;
                                         nextChar();
                                 }

@@ -7,7 +7,8 @@
 
 enum class TokenType {
     Instruction = 0x0,
-    Number,
+    DecimalNumber,
+    HexNumber,
     Lparan,
     Rparan,
     Colon,
