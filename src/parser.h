@@ -28,4 +28,6 @@ private:
     Token nextToken;
 };
 
+int instructionType(const std::string &instruction);
+
 #endif //XASM_PARSER_H

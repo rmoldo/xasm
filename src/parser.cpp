@@ -5,8 +5,10 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #include "parser.h"
+#include "defs.h"
 
 // TODO(Moldo): Find another solution for this
 std::vector<std::string> tokenTypeString {"Instruction",
@@ -57,6 +59,7 @@ void XASMParser::parse() {
                 if (checkNextToken(TokenType::Colon))
                         label();
 
+                // TODO(MOLDO): check if instruction is valid
                 if (checkCurrentToken(TokenType::Instruction))
                         instruction();
 
@@ -73,9 +76,49 @@ void XASMParser::label() {
 }
 
 void XASMParser::instruction() {
+        switch(instructionType(currentToken.value)) {
+                case 1:
 
+                        break;
+                case 2:
+                        break;
+                case 3:
+                        break;
+                case 4:
+                        if (!checkNextToken(TokenType::NewLine) || !checkNextToken(TokenType::Comment)) {
+                                std::cerr << currentToken.value << " does not need operands. \n";
+                                std::abort();
+                        }
+
+                        break;
+                default:
+                        std::cerr << currentToken.value << " unknown instruction\n";
+                        std::abort();
+                        break;
+        }
 }
 
 void XASMParser::operand() {
 
+}
+
+int instructionType(const std::string &instruction) {
+        auto classB1Iterator = std::find(classB1InstructionVector.begin(), classB1InstructionVector.end(), instruction);
+        auto classB2Iterator = std::find(classB2InstructionVector.begin(), classB2InstructionVector.end(), instruction);
+        auto classB3Iterator = std::find(classB3InstructionVector.begin(), classB3InstructionVector.end(), instruction);
+        auto classB4Iterator = std::find(classB4InstructionVector.begin(), classB4InstructionVector.end(), instruction);
+
+        if (classB1Iterator != classB1InstructionVector.end())
+                return 1;
+
+        if (classB2Iterator != classB2InstructionVector.end())
+                return 2;
+
+        if (classB3Iterator != classB3InstructionVector.end())
+                return 3;
+
+        if (classB4Iterator != classB4InstructionVector.end())
+                return 4;
+
+        return -1;
 }
