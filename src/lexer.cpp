@@ -15,6 +15,11 @@ Lexer::Lexer(std::string &source) {
         position = 0;
         currentChar = 0;
 
+        // convert to lowercase
+        for (int i = 0; i < this->source.size(); ++i)
+                if (std::isupper(this->source[i]))
+                        this->source[i] = std::tolower(this->source[i]);
+
         // Initialize currentChar with first character in source
         nextChar();
 }
@@ -104,10 +109,6 @@ Token Lexer::nextToken() {
                                 }
 
                                 std::string word = t.value;
-
-                                std::transform(word.begin(), word.end(),
-                                               word.begin(),
-                                               [](char c) {return std::tolower(c);});
 
                                 auto iterator = std::find_if(instructionVector.begin(),
                                                              instructionVector.end(),
