@@ -20,7 +20,8 @@ public:
     void parse();
     void label();
     void instruction();
-    void operand();
+    void operandDest();
+    void operandSrc();
 
 private:
     Lexer lexer;

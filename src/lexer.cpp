@@ -75,6 +75,7 @@ Token Lexer::nextToken() {
 
                         break;
                 case '0' ... '9':
+                case '-':
                         t.type = TokenType::Number;
                         nextChar();
 
@@ -93,6 +94,9 @@ Token Lexer::nextToken() {
                         // Register
                         if (currentChar == '$') {
                                 t.type = TokenType::Register;
+                                // Delete $ from register name
+                                t.value = "";
+
                                 nextChar();
 
                                 while(std::isalnum(currentChar)) {
@@ -113,8 +117,8 @@ Token Lexer::nextToken() {
                                 auto iterator = std::find_if(instructionVector.begin(),
                                                              instructionVector.end(),
                                                              [&word](const std::string &instructionName) {
-                                        return word == instructionName;
-                                });
+                                                                 return word == instructionName;
+                                                             });
 
                                 if (currentChar == ':' || iterator == instructionVector.end())
                                         t.type = TokenType::Label;

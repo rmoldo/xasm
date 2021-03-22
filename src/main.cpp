@@ -4,6 +4,7 @@
 #include <string>
 #include "lexer.h"
 #include "token.h"
+#include "parser.h"
 
 int main(int argc, char **argv) {
         std::vector<std::string> types {"Instruction",
@@ -30,7 +31,11 @@ int main(int argc, char **argv) {
         source += '\n';
 
         Lexer lexer {source};
+        XASMParser parser {lexer};
 
+        parser.parse();
+
+        /*
         Token t = lexer.nextToken();
 
         while(t.type != TokenType::XASMEOF) {
@@ -38,5 +43,8 @@ int main(int argc, char **argv) {
                 t = lexer.nextToken();
         }
 
+         */
+
+        std::cout << "Parsed successfuly\n";
         return EXIT_SUCCESS;
 }

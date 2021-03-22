@@ -56,8 +56,10 @@ void XASMParser::match(TokenType type) {
 void XASMParser::parse() {
         while (!checkCurrentToken(TokenType::XASMEOF)) {
                 // TODO(Moldo): get address of label
-                if (checkNextToken(TokenType::Colon))
+                if (checkNextToken(TokenType::Colon)) {
                         label();
+                        getNextToken();
+                }
 
                 // TODO(MOLDO): check if instruction is valid
                 if (checkCurrentToken(TokenType::Instruction))
@@ -78,17 +80,38 @@ void XASMParser::label() {
 void XASMParser::instruction() {
         switch(instructionType(currentToken.value)) {
                 case 1:
+                        getNextToken();
+                        operandDest();
+                        match(TokenType::Comma);
+                        operandSrc();
 
                         break;
                 case 2:
+                        if (currentToken.value == "push" || currentToken.value == "pop") {
+                                getNextToken();
+                                match(TokenType::Register);
+                        }
+                        else if (currentToken.value == "call" || currentToken.value == "jmp") {
+                                getNextToken();
+                                operandSrc();
+                        } else {
+                                getNextToken();
+                                operandDest();
+                        }
+
                         break;
                 case 3:
+                        getNextToken();
+                        match(TokenType::Label);
+
                         break;
                 case 4:
-                        if (!checkNextToken(TokenType::NewLine) || !checkNextToken(TokenType::Comment)) {
+                        if (!checkNextToken(TokenType::NewLine) && !checkNextToken(TokenType::Comment)) {
                                 std::cerr << currentToken.value << " does not need operands. \n";
                                 std::abort();
                         }
+
+                        getNextToken();
 
                         break;
                 default:
@@ -98,8 +121,42 @@ void XASMParser::instruction() {
         }
 }
 
-void XASMParser::operand() {
+void XASMParser::operandDest() {
+        if (checkCurrentToken(TokenType::Number)) {
+                std::cerr << "Destination can not be an immediate value\n";
+                std::abort();
+        }
 
+        if (checkCurrentToken(TokenType::Register))
+                // Direct addressing
+                getNextToken();
+        else if (checkCurrentToken(TokenType::Lparan) && checkNextToken(TokenType::Register)) {
+                // Indirect adressing
+                match(TokenType::Lparan);
+                match(TokenType::Register);
+                match(TokenType::Rparan);
+        } else {
+                // Indexed addressing
+                match(TokenType::Number);
+                match(TokenType::Lparan);
+                match(TokenType::Register);
+                match(TokenType::Rparan);
+        }
+}
+
+void XASMParser::operandSrc() {
+        if ((checkCurrentToken(TokenType::Register) || checkCurrentToken(TokenType::Number)) && checkNextToken(TokenType::NewLine))
+                getNextToken();
+        else if (checkCurrentToken(TokenType::Lparan) && checkNextToken(TokenType::Register)) {
+                match(TokenType::Lparan);
+                match(TokenType::Register);
+                match(TokenType::Rparan);
+        } else {
+                match(TokenType::Number);
+                match(TokenType::Lparan);
+                match(TokenType::Register);
+                match(TokenType::Rparan);
+        }
 }
 
 int instructionType(const std::string &instruction) {
