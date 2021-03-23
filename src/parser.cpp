@@ -9,20 +9,22 @@
 
 #include "parser.h"
 #include "defs.h"
+#include "verifier.h"
+
+std::vector<std::string> Verifier::classB1InstructionVector {"mov", "add", "sub", "cmp", "and", "or", "xor"};
+
+std::vector<std::string> Verifier::classB2InstructionVector {"clr", "neg", "inc", "dec", "asl", "asr", "lsr", "rol", "ror", "rlc", "rrc", "jmp",
+                                                             "call", "push", "pop"};
+
+std::vector<std::string> Verifier::classB3InstructionVector {"br", "bne", "beq", "bpl", "bcs", "bcc", "bvs", "bvc"};
+
+std::vector<std::string> Verifier::classB4InstructionVector {"clc", "clv", "clz", "cls", "ccc", "sec", "sev", "sez", "ses", "scc", "nop", "ret",
+                                                             "reti","halt", "wait", "pushflag", "popflag", "pushpc", "poppc"};
 
 // TODO(Moldo): Find another solution for this
-std::vector<std::string> tokenTypeString {"Instruction",
-                                          "Number",
-                                          "Lparan",
-                                          "Rparan",
-                                          "Colon",
-                                          "Dot",
-                                          "Comma",
-                                          "Register",
-                                          "Label",
-                                          "NewLine",
-                                          "Comment",
-                                          "XASMEOF"};
+std::vector<std::string> tokenTypeString {"Instruction", "Number", "Lparan", "Rparan", "Colon", "Dot",
+                                          "Comma", "Register", "Label", "NewLine", "Comment", "XASMEOF"};
+
 XASMParser::XASMParser(Lexer &lexer) {
         this->lexer = lexer;
 
@@ -45,23 +47,25 @@ void XASMParser::getNextToken() {
 }
 
 void XASMParser::match(TokenType type) {
-        if (!checkCurrentToken(type)) {
-                std::cerr << "Expected " << tokenTypeString[(int)type] << " but found " << currentToken.value << "\n";
-                std::abort();
-        }
+        if (!checkCurrentToken(type))
+                throw std::runtime_error("Expected " + tokenTypeString[(int)type] + " but found " + currentToken.value);
+
+        if (type == TokenType::Register && !Verifier::matchRegister(currentToken.value))
+                throw std::runtime_error(currentToken.value + " is not a register.\n");
+        else if (type == TokenType::Number && !Verifier::matchInteger(currentToken.value))
+                throw std::runtime_error(currentToken.value + " is not an integer.\n");
 
         getNextToken();
 }
 
 void XASMParser::parse() {
         while (!checkCurrentToken(TokenType::XASMEOF)) {
-                // TODO(Moldo): get address of label
+                // TODO: Get address of label
                 if (checkNextToken(TokenType::Colon)) {
                         label();
                         getNextToken();
                 }
 
-                // TODO(MOLDO): check if instruction is valid
                 if (checkCurrentToken(TokenType::Instruction))
                         instruction();
 
@@ -81,6 +85,7 @@ void XASMParser::instruction() {
         switch(instructionType(currentToken.value)) {
                 case 1:
                         getNextToken();
+
                         operandDest();
                         match(TokenType::Comma);
                         operandSrc();
@@ -89,6 +94,7 @@ void XASMParser::instruction() {
                 case 2:
                         if (currentToken.value == "push" || currentToken.value == "pop") {
                                 getNextToken();
+
                                 match(TokenType::Register);
                         }
                         else if (currentToken.value == "call" || currentToken.value == "jmp") {
@@ -106,32 +112,26 @@ void XASMParser::instruction() {
 
                         break;
                 case 4:
-                        if (!checkNextToken(TokenType::NewLine) && !checkNextToken(TokenType::Comment)) {
-                                std::cerr << currentToken.value << " does not need operands. \n";
-                                std::abort();
-                        }
+                        if (!checkNextToken(TokenType::NewLine) && !checkNextToken(TokenType::Comment))
+                                throw std::runtime_error(currentToken.value + " does not need operands");
 
                         getNextToken();
 
                         break;
                 default:
-                        std::cerr << currentToken.value << " unknown instruction\n";
-                        std::abort();
-                        break;
+                        throw std::runtime_error(currentToken.value + " unknown instruction.\n");
         }
 }
 
 void XASMParser::operandDest() {
-        if (checkCurrentToken(TokenType::Number)) {
-                std::cerr << "Destination can not be an immediate value\n";
-                std::abort();
-        }
+        if (checkCurrentToken(TokenType::Number) && checkNextToken(TokenType::Comma))
+                throw std::runtime_error("Destination can not be an immediate value.\n");
 
         if (checkCurrentToken(TokenType::Register))
                 // Direct addressing
-                getNextToken();
+                match(TokenType::Register);
         else if (checkCurrentToken(TokenType::Lparan) && checkNextToken(TokenType::Register)) {
-                // Indirect adressing
+                // Indirect addressing
                 match(TokenType::Lparan);
                 match(TokenType::Register);
                 match(TokenType::Rparan);
@@ -145,8 +145,10 @@ void XASMParser::operandDest() {
 }
 
 void XASMParser::operandSrc() {
-        if ((checkCurrentToken(TokenType::Register) || checkCurrentToken(TokenType::Number)) && checkNextToken(TokenType::NewLine))
-                getNextToken();
+        if (checkCurrentToken(TokenType::Register) && (checkNextToken(TokenType::NewLine) || checkNextToken(TokenType::Comment)))
+                match(TokenType::Register);
+        else if (checkCurrentToken(TokenType::Number) && (checkNextToken(TokenType::NewLine) || checkNextToken(TokenType::Comment)))
+                match(TokenType::Number);
         else if (checkCurrentToken(TokenType::Lparan) && checkNextToken(TokenType::Register)) {
                 match(TokenType::Lparan);
                 match(TokenType::Register);
@@ -160,21 +162,16 @@ void XASMParser::operandSrc() {
 }
 
 int instructionType(const std::string &instruction) {
-        auto classB1Iterator = std::find(classB1InstructionVector.begin(), classB1InstructionVector.end(), instruction);
-        auto classB2Iterator = std::find(classB2InstructionVector.begin(), classB2InstructionVector.end(), instruction);
-        auto classB3Iterator = std::find(classB3InstructionVector.begin(), classB3InstructionVector.end(), instruction);
-        auto classB4Iterator = std::find(classB4InstructionVector.begin(), classB4InstructionVector.end(), instruction);
-
-        if (classB1Iterator != classB1InstructionVector.end())
+        if (Verifier::checkClassB1(instruction))
                 return 1;
 
-        if (classB2Iterator != classB2InstructionVector.end())
+        if (Verifier::checkClassB2(instruction))
                 return 2;
 
-        if (classB3Iterator != classB3InstructionVector.end())
+        if (Verifier::checkClassB3(instruction))
                 return 3;
 
-        if (classB4Iterator != classB4InstructionVector.end())
+        if (Verifier::checkClassB4(instruction))
                 return 4;
 
         return -1;

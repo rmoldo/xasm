@@ -7,19 +7,6 @@
 #include "parser.h"
 
 int main(int argc, char **argv) {
-        std::vector<std::string> types {"Instruction",
-                                        "Number",
-                                        "Lparan",
-                                        "Rparan",
-                                        "Colon",
-                                        "Dot",
-                                        "Comma",
-                                        "Register",
-                                        "Label",
-                                        "NewLine",
-                                        "Comment",
-                                        "XASMEOF"};
-
         if (argc < 2) {
                 std::cerr << "Please provide name of file\n";
                 return EXIT_FAILURE;
@@ -33,18 +20,14 @@ int main(int argc, char **argv) {
         Lexer lexer {source};
         XASMParser parser {lexer};
 
-        parser.parse();
-
-        /*
-        Token t = lexer.nextToken();
-
-        while(t.type != TokenType::XASMEOF) {
-                std::cout << types[(int)t.type] << ' ' << ((t.value == std::string{'\n'} ? "newline" : t.value)) << '\n';
-                t = lexer.nextToken();
+        try {
+                parser.parse();
+        } catch (std::exception &e) {
+                std::cerr << "Error during parsing: " << e.what();
+                return EXIT_FAILURE;
         }
 
-         */
-
         std::cout << "Parsed successfuly\n";
+
         return EXIT_SUCCESS;
 }
