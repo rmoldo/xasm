@@ -15,10 +15,10 @@ Lexer::Lexer(std::string &source) {
         position = 0;
         currentChar = 0;
 
-        // convert to lowercase
-        for (int i = 0; i < this->source.size(); ++i)
-                if (std::isupper(this->source[i]))
-                        this->source[i] = std::tolower(this->source[i]);
+        // Convert source to lowercase
+        for (char &c : this->source)
+                if (std::isupper(c))
+                        c = (char)std::tolower(c);
 
         // Initialize currentChar with first character in source
         nextChar();

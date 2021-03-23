@@ -10,7 +10,7 @@
 
 class Lexer {
 public:
-    Lexer() {}
+    Lexer() = default;
     Lexer(std::string &source);
 
     Token nextToken();
