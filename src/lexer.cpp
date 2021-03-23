@@ -159,3 +159,8 @@ void Lexer::skipSpaces() {
         while(isSpace())
                 nextChar();
 }
+
+void Lexer::rewind() {
+        position = 0;
+        nextChar();
+}

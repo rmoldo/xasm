@@ -14,6 +14,8 @@ public:
     Lexer(std::string &source);
 
     Token nextToken();
+
+    void rewind();
 private:
     std::string source;
     char currentChar;
