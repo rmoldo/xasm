@@ -19,14 +19,5 @@ static std::vector<std::string> instructionVector {"mov", "add", "sub", "cmp", "
                                                    "cls", "ccc", "sec", "sev", "sez", "ses", "scc", "nop", "ret", "reti","halt", "wait",
                                                    "pushflag", "popflag", "pushpc", "poppc"};
 
-static std::vector<std::string> classB1InstructionVector {"mov", "add", "sub", "cmp", "and", "or", "xor"};
-
-static std::vector<std::string> classB2InstructionVector {"clr", "neg", "inc", "dec", "asl", "asr", "lsr", "rol", "ror", "rlc", "rrc", "jmp",
-                                                          "call", "push", "pop"};
-
-static std::vector<std::string> classB3InstructionVector {"br", "bne", "beq", "bpl", "bcs", "bcc", "bvs", "bvc"};
-
-static std::vector<std::string> classB4InstructionVector {"clc", "clv", "clz", "cls", "ccc", "sec", "sev", "sez", "ses", "scc", "nop", "ret",
-                                                          "reti","halt", "wait", "pushflag", "popflag", "pushpc", "poppc"};
 
 #endif //XASM_DEFS_H
