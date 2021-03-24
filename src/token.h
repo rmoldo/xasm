@@ -6,15 +6,18 @@
 #define XASM_TOKEN_H
 
 enum class TokenType {
-    Symbol = 0x0,
+    Instruction = 0x0,
     Number,
     Lparan,
     Rparan,
     Colon,
+    Dot,
     Comma,
+    Register,
+    Label,
     NewLine,
     Comment,
-    EOF
+    XASMEOF
 };
 
 struct Token {
