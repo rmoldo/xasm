@@ -8,7 +8,6 @@
 #include <algorithm>
 
 #include "parser.h"
-#include "defs.h"
 #include "verifier.h"
 
 std::vector<std::string> Verifier::classB1InstructionVector {"mov", "add", "sub", "cmp", "and", "or", "xor"};
@@ -25,7 +24,7 @@ std::vector<std::string> Verifier::classB4InstructionVector {"clc", "clv", "clz"
 std::vector<std::string> tokenTypeString {"Instruction", "Number", "Lparan", "Rparan", "Colon", "Dot",
                                           "Comma", "Register", "Label", "NewLine", "Comment", "XASMEOF"};
 
-XASMParser::XASMParser(Lexer &lexer) : pc(0) {
+XASMParser::XASMParser(Lexer &lexer) : pc{0} {
         this->lexer = lexer;
 
         // Initialize currentToken and nextToken
@@ -96,7 +95,6 @@ void XASMParser::instruction() {
                         operandDest();
                         match(TokenType::Comma);
                         operandSrc();
-                        pc += 2;
 
                         break;
                 case 2:
@@ -112,13 +110,11 @@ void XASMParser::instruction() {
                                 getNextToken();
                                 operandDest();
                         }
-                        pc += 2;
 
                         break;
                 case 3:
                         getNextToken();
                         match(TokenType::Label);
-                        pc += 2;
 
                         break;
                 case 4:
@@ -126,12 +122,12 @@ void XASMParser::instruction() {
                                 throw std::runtime_error(currentToken.value + " does not need operands");
 
                         getNextToken();
-                        pc += 2;
 
                         break;
                 default:
                         throw std::runtime_error(currentToken.value + " unknown instruction.\n");
         }
+        pc += 2;
 }
 
 void XASMParser::operandDest() {

@@ -8,6 +8,7 @@
 #include <map>
 
 #include "lexer.h"
+#include "defs.h"
 
 class XASMParser {
 public:
@@ -29,8 +30,8 @@ private:
     Lexer lexer;
     Token currentToken;
     Token nextToken;
-    std::map<std::string, uint> labels;
-    uint pc;
+    std::map<std::string, u16> labels;
+    u16 pc;
 };
 
 int instructionType(const std::string &instruction);
