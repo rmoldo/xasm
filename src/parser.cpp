@@ -8,7 +8,6 @@
 #include <algorithm>
 
 #include "parser.h"
-#include "defs.h"
 #include "verifier.h"
 
 std::vector<std::string> Verifier::classB1InstructionVector {"mov", "add", "sub", "cmp", "and", "or", "xor"};
@@ -25,7 +24,7 @@ std::vector<std::string> Verifier::classB4InstructionVector {"clc", "clv", "clz"
 std::vector<std::string> tokenTypeString {"Instruction", "Number", "Lparan", "Rparan", "Colon", "Dot",
                                           "Comma", "Register", "Label", "NewLine", "Comment", "XASMEOF"};
 
-XASMParser::XASMParser(Lexer &lexer) {
+XASMParser::XASMParser(Lexer &lexer) : pc{0} {
         this->lexer = lexer;
 
         // Initialize currentToken and nextToken
@@ -60,7 +59,6 @@ void XASMParser::match(TokenType type) {
 
 void XASMParser::parse() {
         while (!checkCurrentToken(TokenType::XASMEOF)) {
-                // TODO: Get address of label
                 if (checkNextToken(TokenType::Colon)) {
                         label();
                         getNextToken();
@@ -77,7 +75,15 @@ void XASMParser::parse() {
 }
 
 void XASMParser::label() {
+        //save label name, as match function will override current token
+        std::string l = currentToken.value;
         match(TokenType::Label);
+        auto searchedLabel = labels.find(l);
+        if(searchedLabel != labels.end() && searchedLabel->second != 0)
+            throw std::runtime_error("Label " + l + " already exists\n");
+
+        labels[l] = pc;
+
         getNextToken();
 }
 
@@ -121,6 +127,7 @@ void XASMParser::instruction() {
                 default:
                         throw std::runtime_error(currentToken.value + " unknown instruction.\n");
         }
+        pc += 2;
 }
 
 void XASMParser::operandDest() {
@@ -141,14 +148,17 @@ void XASMParser::operandDest() {
                 match(TokenType::Lparan);
                 match(TokenType::Register);
                 match(TokenType::Rparan);
+                pc += 2;
         }
 }
 
 void XASMParser::operandSrc() {
         if (checkCurrentToken(TokenType::Register) && (checkNextToken(TokenType::NewLine) || checkNextToken(TokenType::Comment)))
                 match(TokenType::Register);
-        else if (checkCurrentToken(TokenType::Number) && (checkNextToken(TokenType::NewLine) || checkNextToken(TokenType::Comment)))
-                match(TokenType::Number);
+        else if (checkCurrentToken(TokenType::Number) && (checkNextToken(TokenType::NewLine) || checkNextToken(TokenType::Comment))) {
+            match(TokenType::Number);
+            pc += 2;
+        }
         else if (checkCurrentToken(TokenType::Lparan) && checkNextToken(TokenType::Register)) {
                 match(TokenType::Lparan);
                 match(TokenType::Register);
@@ -158,6 +168,7 @@ void XASMParser::operandSrc() {
                 match(TokenType::Lparan);
                 match(TokenType::Register);
                 match(TokenType::Rparan);
+                pc += 2;
         }
 }
 

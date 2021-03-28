@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 #include "lexer.h"
-#include "token.h"
 #include "parser.h"
 
 int main(int argc, char **argv) {

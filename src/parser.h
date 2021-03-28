@@ -5,7 +5,10 @@
 #ifndef XASM_PARSER_H
 #define XASM_PARSER_H
 
+#include <map>
+
 #include "lexer.h"
+#include "defs.h"
 
 class XASMParser {
 public:
@@ -27,6 +30,8 @@ private:
     Lexer lexer;
     Token currentToken;
     Token nextToken;
+    std::map<std::string, u16> labels;
+    u16 pc;
 };
 
 int instructionType(const std::string &instruction);
