@@ -83,6 +83,7 @@ void XASMParser::label() {
             throw std::runtime_error("Label " + l + " already exists\n");
 
         labels[l] = pc;
+        std::cout << "label " << l << " address " << pc << std::endl;
 
         getNextToken();
 }
@@ -170,6 +171,14 @@ void XASMParser::operandSrc() {
                 match(TokenType::Rparan);
                 pc += 2;
         }
+}
+
+Token XASMParser::getCurrentToken() {
+    return currentToken;
+}
+
+std::map<std::string, u16> XASMParser::getLabels() {
+    return labels;
 }
 
 int instructionType(const std::string &instruction) {

@@ -26,6 +26,9 @@ public:
     void operandDest();
     void operandSrc();
 
+    Token getCurrentToken();
+    std::map<std::string, u16> getLabels();
+
 private:
     Lexer lexer;
     Token currentToken;

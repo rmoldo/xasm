@@ -4,6 +4,7 @@
 #include <string>
 #include "lexer.h"
 #include "parser.h"
+#include "XASMGenerator.h"
 
 int main(int argc, char **argv) {
         if (argc < 2) {
@@ -28,5 +29,14 @@ int main(int argc, char **argv) {
 
         std::cout << "Parsed successfuly\n";
 
+        lexer.rewind();
+        XASMGenerator generator {lexer};
+
+        try {
+            generator.generate();
+        } catch (std::exception &e) {
+            std::cerr << "Error during generating: " << e.what();
+            return EXIT_FAILURE;
+        }
         return EXIT_SUCCESS;
 }
