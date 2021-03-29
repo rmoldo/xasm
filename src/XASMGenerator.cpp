@@ -49,16 +49,17 @@ void XASMGenerator::generateObjectCode() {
             break;
         }
         case 2:
-            if (crtToken.value == "push" || crtToken.value == "pop") {
+            if (crtToken.value == "call" || crtToken.value == "jmp") {
                 getNextToken();
-
-                match(TokenType::Register);
-            } else if (crtToken.value == "call" || crtToken.value == "jmp") {
-                getNextToken();
+                //TODO
                 //operandSrc();
             } else {
+                u16 instruction = instructions[crtToken.value];
                 getNextToken();
-                //operandDest();
+                bool needsImmediate = operandDest(instruction);
+                data.push_back(instruction);
+                if (needsImmediate)
+                    data.push_back(immediateValue);
             }
 
             break;
