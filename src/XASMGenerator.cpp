@@ -7,7 +7,7 @@
 #include "XASMGenerator.h"
 #include "encoding.h"
 
-XASMGenerator::XASMGenerator(Lexer &lexer) : XASMParser{lexer}, pc{0} {}
+XASMGenerator::XASMGenerator(Lexer &lexer, Labels& labels) : XASMParser{lexer}, labels(labels), pc{0} {}
 
 void XASMGenerator::generate() {
     try {
@@ -40,51 +40,47 @@ void XASMGenerator::generateObjectCode() {
             getNextToken();
 
             bool destNeedsImmediate = operandDest(instruction);
-            //std::cout << std::hex << instruction << " immediate: " << immediateValue <<std::endl;
             match(TokenType::Comma);
             operandSrc(instruction);
-            //std::cout << std::hex << instruction << " immediate: " << immediateValue <<std::endl;
             if (destNeedsImmediate)
                 data.push_back(immediateValue);
             break;
         }
-        case 2:
+        case 2: {
             if (crtToken.value == "call" || crtToken.value == "jmp") {
-                getNextToken();
+                //getNextToken();
                 //TODO
                 //operandSrc();
-            } else {
-                u16 instruction = instructions[crtToken.value];
-                getNextToken();
-                bool needsImmediate = operandDest(instruction);
-                data.push_back(instruction);
-                if (needsImmediate)
-                    data.push_back(immediateValue);
             }
-
-            break;
-        case 3:
+            u16 instruction = instructions[crtToken.value];
             getNextToken();
-            //calculate label offset
-            std::cout << "found label " << crtToken.value << " at address: " << pc << std::endl;
+            bool needsImmediate = operandDest(instruction);
+            data.push_back(instruction);
+            if (needsImmediate)
+                data.push_back(immediateValue);
+            break;
+        }
+        case 3: {
+            u16 instruction = instructions[crtToken.value];
+            getNextToken();
+            int dest = labels[getCurrentToken().value] - (pc + 2);
+            instruction |= (dest & 0xFF);
+            data.push_back(instruction);
             match(TokenType::Label);
 
             break;
-        case 4:
-            if (!checkNextToken(TokenType::NewLine) && !checkNextToken(TokenType::Comment))
-                throw std::runtime_error(crtToken.value + " does not need operands");
-
+        }
+        case 4: {
+            u16 instruction = instructions[crtToken.value];
+            data.push_back(instruction);
             getNextToken();
 
             break;
+        }
         default:
             throw std::runtime_error(crtToken.value + " unknown instruction.\n");
     }
     pc += 2;
-
-
-    for (auto nr : data)
-        std::cout << std::hex << nr << " ";
 }
 
 bool XASMGenerator::operandDest(u16 &instruction) {

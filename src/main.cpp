@@ -19,9 +19,11 @@ int main(int argc, char **argv) {
 
         Lexer lexer {source};
         XASMParser parser {lexer};
+        std::map<std::string, u16> labels;
 
         try {
                 parser.parse();
+                labels = parser.getLabels();
         } catch (std::exception &e) {
                 std::cerr << "Error during parsing: " << e.what();
                 return EXIT_FAILURE;
@@ -30,10 +32,11 @@ int main(int argc, char **argv) {
         std::cout << "Parsed successfuly\n";
 
         lexer.rewind();
-        XASMGenerator generator {lexer};
+        XASMGenerator generator {lexer, labels};
 
         try {
             generator.generate();
+            std::cout << "Binary generated successfully\n";
         } catch (std::exception &e) {
             std::cerr << "Error during generating: " << e.what();
             return EXIT_FAILURE;

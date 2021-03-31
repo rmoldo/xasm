@@ -27,13 +27,13 @@ public:
     void operandSrc();
 
     Token getCurrentToken();
-    std::map<std::string, u16> getLabels();
+    Labels getLabels();
 
 private:
     Lexer lexer;
     Token currentToken;
     Token nextToken;
-    std::map<std::string, u16> labels;
+    Labels labels;
     u16 pc;
 };
 

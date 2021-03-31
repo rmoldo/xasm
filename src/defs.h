@@ -7,10 +7,12 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
+typedef std::map<std::string, u16> Labels;
 
 
 static std::vector<std::string> instructionVector {"mov", "add", "sub", "cmp", "and", "or", "xor", "clr", "neg", "inc", "dec",

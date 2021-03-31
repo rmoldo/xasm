@@ -10,7 +10,7 @@
 
 class XASMGenerator : private XASMParser{
 public:
-    XASMGenerator(Lexer& lexer);
+    XASMGenerator(Lexer& lexer, Labels& labels);
     void generate();
 
 private:
@@ -23,6 +23,7 @@ private:
     std::vector<u16> data;
     u16 pc;
     u16 immediateValue;
+    Labels labels;
 };
 
 
