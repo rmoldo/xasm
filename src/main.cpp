@@ -12,13 +12,13 @@ int main(int argc, char **argv) {
                 return EXIT_FAILURE;
         }
 
-        std::ifstream ifs {argv[1]};
+        std::ifstream ifs{argv[1]};
 
-        std::string source {std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>()};
+        std::string source{std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>()};
         source += '\n';
 
-        Lexer lexer {source};
-        XASMParser parser {lexer};
+        Lexer lexer{source};
+        XASMParser parser{lexer};
         std::map<std::string, u16> labels;
 
         try {
@@ -32,14 +32,14 @@ int main(int argc, char **argv) {
         std::cout << "Parsed successfuly\n";
 
         lexer.rewind();
-        XASMGenerator generator {lexer, labels};
+        XASMGenerator generator{lexer, labels};
 
         try {
-            generator.generate();
-            std::cout << "Binary generated successfully\n";
+                generator.generate();
+                std::cout << "Binary generated successfully\n";
         } catch (std::exception &e) {
-            std::cerr << "Error during generating: " << e.what();
-            return EXIT_FAILURE;
+                std::cerr << "Error during generating: " << e.what();
+                return EXIT_FAILURE;
         }
         return EXIT_SUCCESS;
 }

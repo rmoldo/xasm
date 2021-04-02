@@ -104,7 +104,12 @@ void XASMParser::instruction() {
                         }
                         else if (currentToken.value == "call" || currentToken.value == "jmp") {
                                 getNextToken();
-                                operandSrc();
+                                if(checkCurrentToken(TokenType::Label)) {
+                                        pc += 2;
+                                        match(TokenType::Label);
+                                }
+                                else
+                                        operandSrc();
                         } else {
                                 getNextToken();
                                 operandDest();

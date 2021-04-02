@@ -8,16 +8,21 @@
 #include <vector>
 #include "parser.h"
 
-class XASMGenerator : private XASMParser{
+class XASMGenerator : private XASMParser {
 public:
-    XASMGenerator(Lexer& lexer, Labels& labels);
+    XASMGenerator(Lexer &lexer, Labels &labels);
+
     void generate();
 
 private:
-    u16 getRegisterNumber(u16& operand);
-    bool operandDest(u16& instruction);
-    void operandSrc(u16& instruction);
+    u16 getRegisterNumber(u16 &operand);
+
+    bool operandDest(u16 &instruction);
+
+    void operandSrc(u16 &instruction);
+
     void generateObjectCode();
+
     void parse();
 
     std::vector<u16> data;
