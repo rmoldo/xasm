@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 
         Lexer lexer{source};
         XASMParser parser{lexer};
-        std::map<std::string, u16> labels;
+        Labels labels;
 
         try {
                 parser.parse();
@@ -41,5 +41,6 @@ int main(int argc, char **argv) {
                 std::cerr << "Error during generating: " << e.what();
                 return EXIT_FAILURE;
         }
+        
         return EXIT_SUCCESS;
 }
