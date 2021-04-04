@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
                 return EXIT_FAILURE;
         }
 
-        std::cout << "Parsed successfuly\n";
+        std::cout << "Parsed successfully\n";
 
         lexer.rewind();
         XASMGenerator generator{lexer, labels};

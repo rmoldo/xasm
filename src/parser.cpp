@@ -84,6 +84,7 @@ void XASMParser::label() {
         if(searchedLabel != labels.end() && searchedLabel->second != 0)
             throw std::runtime_error("Label " + l + " already exists\n");
 
+        //save label's definition address for generate stage
         labels[l] = pc;
         getNextToken();
 }

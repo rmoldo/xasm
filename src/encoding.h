@@ -1,6 +1,10 @@
-//
-// Created by tallarry on 3/28/21.
-//
+/**
+ * Contains all instructions and their opcode defined
+ * Unknown fields are set to 0
+ * @file encoding.h
+ * @author Silvan Talos
+ * @version 3/28/21
+ */
 
 #ifndef XASM_ENCODING_H
 #define XASM_ENCODING_H

@@ -1,6 +1,9 @@
-//
-// Created by tallarry on 3/27/21.
-//
+/**
+ * Object code generator
+ * @file XASMGenerator.h
+ * @author Silvan Talos
+ * @version 3/27/21
+ */
 
 #include <iostream>
 #include <fstream>
@@ -12,7 +15,9 @@ XASMGenerator::XASMGenerator(Lexer &lexer, Labels &labels) : XASMParser{lexer}, 
 void XASMGenerator::generate() {
         try {
                 parse();
+
                 std::ofstream file = std::ofstream("output.out", std::ios::binary);
+                //writes all content of data to file as binary
                 file.write((char *) &data[0], data.size() * sizeof(u16));
                 file.close();
         } catch (std::exception &e) {
@@ -37,10 +42,13 @@ void XASMGenerator::generateObjectCode() {
                         u16 instruction = instructions[crtToken.value];
                         getNextToken();
 
+                        //note if destination operand needs an immediate value to be added after instruction in data vector
                         bool destNeedsImmediate = operandDest(instruction);
                         match(TokenType::Comma);
+                        //processes source operand and saves instruction in data vector
                         operandSrc(instruction);
 
+                        //add immediate value in data vector after instruction
                         if (destNeedsImmediate)
                                 data.push_back(immediateValue);
 
@@ -49,14 +57,18 @@ void XASMGenerator::generateObjectCode() {
 
                 case 2: {
                         u16 instruction = instructions[crtToken.value];
+
+                        //call and jmp can also have a label as offset
                         if (crtToken.value == "call" || crtToken.value == "jmp") {
                                 if(checkNextToken(TokenType::Label)) {
                                         getNextToken();
 
                                         data.push_back(instruction);
+                                        //add the label address as immediate value
                                         data.push_back(labels[getCurrentToken().value]);
 
                                         match(TokenType::Label);
+                                        //increment pc as label address is immediate value stored at next location
                                         pc += 2;
 
                                         break;
@@ -77,6 +89,7 @@ void XASMGenerator::generateObjectCode() {
                         u16 instruction = instructions[crtToken.value];
                         getNextToken();
 
+                        //calculate relative offset
                         int dest = labels[getCurrentToken().value] - (pc + 2);
                         instruction |= (dest & 0xFF);
                         data.push_back(instruction);
@@ -119,6 +132,7 @@ bool XASMGenerator::operandDest(u16 &instruction) {
                 match(TokenType::Rparan);
         } else {
                 // Indexed addressing
+                //save immediate value to be added after instruction
                 immediateValue = static_cast<u16>(std::stoul(getCurrentToken().value));
 
                 match(TokenType::Number);
@@ -129,7 +143,8 @@ bool XASMGenerator::operandDest(u16 &instruction) {
                 
                 match(TokenType::Register);
                 match(TokenType::Rparan);
-                
+
+                //increment pc for the immediate value of the index
                 pc += 2;
 
                 return true;
@@ -153,12 +168,14 @@ u16 XASMGenerator::getRegisterNumber(u16 &operand) {
 void XASMGenerator::operandSrc(u16 &instruction) {
         if (checkCurrentToken(TokenType::Register) &&
             (checkNextToken(TokenType::NewLine) || checkNextToken(TokenType::Comment))) {
+                //Direct addressing
                 u16 mas = 0x0010;
                 instruction |= ((getRegisterNumber(mas) & 0x1F) << 6);
 
                 match(TokenType::Register);
         } else if (checkCurrentToken(TokenType::Number) &&
                    (checkNextToken(TokenType::NewLine) || checkNextToken(TokenType::Comment))) {
+                //Immediate addressing
                 u16 immediateVal{static_cast<u16>(std::stoul(getCurrentToken().value))};
 
                 match(TokenType::Number);
@@ -170,6 +187,7 @@ void XASMGenerator::operandSrc(u16 &instruction) {
                 
                 return;
         } else if (checkCurrentToken(TokenType::Lparan) && checkNextToken(TokenType::Register)) {
+                //Indirect addressing
                 match(TokenType::Lparan);
 
                 u16 mas = 0x0020;
@@ -178,6 +196,7 @@ void XASMGenerator::operandSrc(u16 &instruction) {
                 match(TokenType::Register);
                 match(TokenType::Rparan);
         } else {
+                //Indexed addressing
                 u16 immediateVal{static_cast<u16>(std::stoul(getCurrentToken().value))};
                 match(TokenType::Number);
                 match(TokenType::Lparan);
