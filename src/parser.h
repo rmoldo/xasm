@@ -26,11 +26,14 @@ public:
     void operandDest();
     void operandSrc();
 
+    Token getCurrentToken();
+    Labels getLabels();
+
 private:
     Lexer lexer;
     Token currentToken;
     Token nextToken;
-    std::map<std::string, u16> labels;
+    Labels labels;
     u16 pc;
 };
 

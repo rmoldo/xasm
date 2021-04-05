@@ -51,7 +51,8 @@ void XASMParser::match(TokenType type) {
 
         if (type == TokenType::Register && !Verifier::matchRegister(currentToken.value))
                 throw std::runtime_error(currentToken.value + " is not a register.\n");
-        else if (type == TokenType::Number && !Verifier::matchInteger(currentToken.value))
+        
+        if (type == TokenType::Number && !Verifier::matchInteger(currentToken.value))
                 throw std::runtime_error(currentToken.value + " is not an integer.\n");
 
         getNextToken();
@@ -78,12 +79,13 @@ void XASMParser::label() {
         //save label name, as match function will override current token
         std::string l = currentToken.value;
         match(TokenType::Label);
+
         auto searchedLabel = labels.find(l);
         if(searchedLabel != labels.end() && searchedLabel->second != 0)
             throw std::runtime_error("Label " + l + " already exists\n");
 
+        //save label's definition address for generate stage
         labels[l] = pc;
-
         getNextToken();
 }
 
@@ -102,10 +104,15 @@ void XASMParser::instruction() {
                                 getNextToken();
 
                                 match(TokenType::Register);
-                        }
-                        else if (currentToken.value == "call" || currentToken.value == "jmp") {
+                        } else if (currentToken.value == "call" || currentToken.value == "jmp") {
                                 getNextToken();
-                                operandSrc();
+                                if(checkCurrentToken(TokenType::Label)) {
+                                        pc += 2;
+                                        match(TokenType::Label);
+                                } else {
+                                        operandSrc();
+                                }
+
                         } else {
                                 getNextToken();
                                 operandDest();
@@ -127,6 +134,7 @@ void XASMParser::instruction() {
                 default:
                         throw std::runtime_error(currentToken.value + " unknown instruction.\n");
         }
+
         pc += 2;
 }
 
@@ -148,6 +156,7 @@ void XASMParser::operandDest() {
                 match(TokenType::Lparan);
                 match(TokenType::Register);
                 match(TokenType::Rparan);
+
                 pc += 2;
         }
 }
@@ -157,9 +166,9 @@ void XASMParser::operandSrc() {
                 match(TokenType::Register);
         else if (checkCurrentToken(TokenType::Number) && (checkNextToken(TokenType::NewLine) || checkNextToken(TokenType::Comment))) {
             match(TokenType::Number);
+
             pc += 2;
-        }
-        else if (checkCurrentToken(TokenType::Lparan) && checkNextToken(TokenType::Register)) {
+        } else if (checkCurrentToken(TokenType::Lparan) && checkNextToken(TokenType::Register)) {
                 match(TokenType::Lparan);
                 match(TokenType::Register);
                 match(TokenType::Rparan);
@@ -168,8 +177,17 @@ void XASMParser::operandSrc() {
                 match(TokenType::Lparan);
                 match(TokenType::Register);
                 match(TokenType::Rparan);
+
                 pc += 2;
         }
+}
+
+Token XASMParser::getCurrentToken() {
+    return currentToken;
+}
+
+Labels XASMParser::getLabels() {
+    return labels;
 }
 
 int instructionType(const std::string &instruction) {
