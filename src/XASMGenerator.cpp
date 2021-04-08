@@ -21,8 +21,9 @@ void XASMGenerator::generate() {
                 file.write((char *) &data[0], data.size() * sizeof(u16));
                 file.close();
         } catch (std::exception &e) {
-                std::cerr << "Error during generate stage parsing: " << e.what();
                 throw;
+        } catch (...) {
+                std::cerr << "Unknown error during generate stage" << std::endl;
         }
 }
 
@@ -64,6 +65,8 @@ void XASMGenerator::generateObjectCode() {
                                         getNextToken();
 
                                         data.push_back(instruction);
+
+                                        checkLabelDefined(getCurrentToken().value);
                                         //add the label address as immediate value
                                         data.push_back(labels[getCurrentToken().value]);
 
@@ -88,6 +91,8 @@ void XASMGenerator::generateObjectCode() {
                 case 3: {
                         u16 instruction = instructions[crtToken.value];
                         getNextToken();
+
+                        checkLabelDefined(getCurrentToken().value);
 
                         //calculate relative offset
                         int dest = labels[getCurrentToken().value] - (pc + 2);
@@ -216,4 +221,10 @@ void XASMGenerator::operandSrc(u16 &instruction) {
         }
         
         data.push_back(instruction);
+}
+
+void XASMGenerator::checkLabelDefined(std::string label) {
+        auto searchedLabel = labels.find(label);
+        if(searchedLabel == labels.end())
+                throw std::runtime_error("Label " + label + " not defined\n");
 }
