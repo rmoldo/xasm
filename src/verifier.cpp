@@ -17,7 +17,7 @@ bool Verifier::matchRegister(const std::string &reg) {
 
 bool Verifier::matchInteger(const std::string &number) {
         // Regex for integer numbers matching
-        std::regex integer_regex {"^[-]?[1-9]\\d*$"};
+        std::regex integer_regex {"^[-]?[1-9]\\d*$|^0$"};
 
         return std::regex_match(number, integer_regex);
 }

@@ -39,6 +39,9 @@ private:
     ///Parses the file extracting each instruction
     void parse();
 
+    ///Verifies label is defined within program
+    void checkLabelDefined(std::string label);
+
     std::vector<u16> data;
     u16 pc;
     u16 immediateValue;

@@ -110,7 +110,7 @@ void XASMParser::instruction() {
                                         pc += 2;
                                         match(TokenType::Label);
                                 } else {
-                                        operandSrc();
+                                        operandDest();
                                 }
 
                         } else {
