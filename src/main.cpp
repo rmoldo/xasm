@@ -13,6 +13,10 @@ int main(int argc, char **argv) {
         }
 
         std::ifstream ifs{argv[1]};
+        if(!ifs) {
+                std::cerr << "File not found\n";
+                return EXIT_FAILURE;
+        }
 
         std::string source{std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>()};
         source += '\n';
